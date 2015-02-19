@@ -15,14 +15,14 @@
 --------------------------------------------------------------------------------------------------------
 
 drop table mimic_data_nov14;
-create table mimic_data_nov14 as
+create table mimic_data_feb15 as
 with population_1 as
 (select distinct subject_id, hadm_id, icustay_id
 from mimic2v26.icustay_detail
 where icustay_seq=1 
 and ICUSTAY_AGE_GROUP='adult'
 and ICUSTAY_LOS>=48*60 -- at least 48 hour of icu stay
---and icustay_id<100
+--and icustay_id<10
 )
 
 --select * from population; --15647
@@ -437,7 +437,7 @@ pop.icustay_id
   when lab.itemid = 50061 then 'ALP' 
   when lab.itemid = 50062 then 'ALT'
   when lab.itemid = 50073 then 'AST'
-  when lab.itemid = 50626 then 'Bilirubin'
+  --when lab.itemid = 50626 then 'Bilirubin'
   when lab.itemid = 50177 then 'BUN'
   when lab.itemid = 50085 then 'cholesterol'
   when lab.itemid = 50090 then 'creatinine'
@@ -465,13 +465,13 @@ pop.icustay_id
 , lab.valuenum as value1
 , lab.valueuom as value1uom
 from population pop
-join mimic2v26.labevents lab on lab.icustay_id=pop.icustay_id and lab.vluenum is not null
+join mimic2v26.labevents lab on lab.icustay_id=pop.icustay_id and lab.valuenum is not null
     --and ch.charttime <= pop.icustay_intime+3
 where lab.itemid = 50060 -- Albumin
   or lab.itemid = 50061 -- ALP
   or lab.itemid = 50062 -- ALT
   or lab.itemid = 50073 -- AST
-  or lab.itemid = 50626 -- Bilirubin
+  --or lab.itemid = 50626 -- Bilirubin
   or lab.itemid = 50177 -- bun
   or lab.itemid = 50085 -- cholesterol
   or lab.itemid = 50090 -- creatinine
@@ -493,6 +493,30 @@ where lab.itemid = 50060 -- Albumin
 )
 
 --select * from lab_data;
+
+, bilirubin_data as
+(select distinct
+pop.icustay_id
+, 'Bilirubin' as variable_name
+, round( (extract(day from lab.charttime-pop.icustay_intime) *24
+    + extract(hour from lab.charttime-pop.icustay_intime)
+    + extract(minute from lab.charttime-pop.icustay_intime)/60
+  ), 2)as timestamp_hr
+--, null as timestamp_2
+, case when lab.value in ('NEG', 'N', 'Neg') then 0
+       when lab.value ='LG' then 1 
+       when lab.value ='SM' then 2
+       else 3
+       end as value1
+, to_char(null) as value1uom
+from population pop
+join mimic2v26.labevents lab on lab.icustay_id=pop.icustay_id
+    --and ch.charttime <= pop.icustay_intime+3
+where  lab.itemid = 50626 -- Bilirubin
+  
+)
+
+--select * from bilirubin_data;
 --------------------------------------------------------------------------------------------------------
 -------------------------- Final integration  ----------------------------------------------------------
 --------------------------------------------------------------------------------------------------------
@@ -510,9 +534,13 @@ union
 select * from chart_data
 union
 select * from lab_data
+union
+select * from bilirubin_data
 )
 
 select * from time_series_table order by 1;
+
+--select * from time_series_table where variable_name ='Bilirubin' order by 1;
 
 -------- exporting to csv file
 
