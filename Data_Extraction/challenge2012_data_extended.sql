@@ -200,7 +200,7 @@ ICU_LOS_DAY as 'ICU_LOS_DAY'
 ,HOSP_EXP_FLG as 'HOSP_EXP_FLG'
 ,ICU_EXP_FLG as 'ICU_EXP_FLG'
 ,SURVIVAL_DAY as 'SURVIVAL_DAY'
-,CONGESTIVE_HEART_FAILURE as 'SURVIVAL_DAY'
+,CONGESTIVE_HEART_FAILURE as 'CONGESTIVE_HEART_FAILURE'
 ,CARDIAC_ARRHYTHMIAS as 'CARDIAC_ARRHYTHMIAS'
 ,VALVULAR_DISEASE as 'VALVULAR_DISEASE'
 ,PULMONARY_CIRCULATION as 'PULMONARY_CIRCULATION'
@@ -213,7 +213,7 @@ ICU_LOS_DAY as 'ICU_LOS_DAY'
 ,DIABETES_COMPLICATED as 'DIABETES_COMPLICATED'
 ,HYPOTHYROIDISM as 'HYPOTHYROIDISM'
 ,RENAL_FAILURE as 'RENAL_FAILURE'
-,LIVER_DISEASE as 'RENAL_FAILURE'
+,LIVER_DISEASE as 'LIVER_DISEASE'
 ,PEPTIC_ULCER as 'PEPTIC_ULCER'
 ,AIDS as 'AIDS'
 ,LYMPHOMA as 'LYMPHOMA'
@@ -465,7 +465,7 @@ pop.icustay_id
 , lab.valuenum as value1
 , lab.valueuom as value1uom
 from population pop
-join mimic2v26.labevents lab on lab.icustay_id=pop.icustay_id
+join mimic2v26.labevents lab on lab.icustay_id=pop.icustay_id and lab.vluenum is not null
     --and ch.charttime <= pop.icustay_intime+3
 where lab.itemid = 50060 -- Albumin
   or lab.itemid = 50061 -- ALP
