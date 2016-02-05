@@ -301,14 +301,14 @@ select * from final_table; --13912
 --------------------------------------------------------------------------------------------------------
 -------------------------- Vent & vasopressor patients  ------------------------------------------------
 --------------------------------------------------------------------------------------------------------
-create table kdd_tier2_feb as
+--create table kdd_tier2_feb as
 with population as
 (select kdd.icustay_id
 , icu.intime as icustay_intime
 , icu.outtime as icustay_outtime
 from kdd_tier1_feb kdd
 join mimic2v26.icustayevents icu on kdd.icustay_id= icu.icustay_id
---where kdd.icustay_id<10
+where kdd.icustay_id<10
 )
 
 --select * from population;
